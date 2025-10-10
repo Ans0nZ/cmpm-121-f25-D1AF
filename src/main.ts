@@ -18,7 +18,6 @@ const meditate = document.getElementById("meditate")!;
 const flame = document.getElementById("flame") as HTMLImageElement;
 const counterDiv = document.getElementById("counter") as HTMLDivElement; //counter div
 
-
 meditate.addEventListener("click", () => {
   counter++;
   counterDiv.textContent = `${counter} ${UNIT}`;

@@ -8,25 +8,24 @@
 /* body */
 .icon {
   display: block;
-  width: 300px; 
+  width: 300px;
   height: auto;
 }
 
 .flame {
   position: absolute;
   left: 50%;
-  top: 15%; 
+  top: 15%;
   transform: translate(-50%, -50%);
-  width: 40px; 
+  width: 40px;
   height: auto;
 
-  pointer-events: none; 
-  opacity: 0; 
+  pointer-events: none;
+  opacity: 0;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-
 .flame.show {
   opacity: 1;
-  transform: translate(-50%, -60%); 
+  transform: translate(-50%, -60%);
 }
