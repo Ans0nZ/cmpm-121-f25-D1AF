@@ -1,20 +1,32 @@
+/* center */
+.meditate {
+  position: relative;
+  width: max-content;
+  margin: 0 auto;
+}
+
+/* body */
 .icon {
   display: block;
-  margin: 0 auto;
-  width: 200px;
+  width: 300px; 
   height: auto;
 }
 
-#counter {
-  font-size: 22px;
-  text-align: center;
-  margin-top: 10px;
+.flame {
+  position: absolute;
+  left: 50%;
+  top: 15%; 
+  transform: translate(-50%, -50%);
+  width: 40px; 
+  height: auto;
+
+  pointer-events: none; 
+  opacity: 0; 
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-#message {
-  font-size: 18px;
-  color: green;
-  text-align: center;
-  margin-top: 5px;
-  transition: opacity 0.5s;
+
+.flame.show {
+  opacity: 1;
+  transform: translate(-50%, -60%); 
 }
