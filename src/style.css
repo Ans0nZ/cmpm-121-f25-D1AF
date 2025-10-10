@@ -1,6 +1,20 @@
 .icon {
   display: block;
-  margin: 0 auto; 
-  width: 200px;     
-  height: auto; 
+  margin: 0 auto;
+  width: 200px;
+  height: auto;
+}
+
+#counter {
+  font-size: 22px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+#message {
+  font-size: 18px;
+  color: green;
+  text-align: center;
+  margin-top: 5px;
+  transition: opacity 0.5s;
 }
