@@ -4,6 +4,7 @@ import "./style.css";
 
 let counter: number = 0;
 const UNIT = "qi";
+const rps = 1;
 
 document.body.innerHTML = `
   <div id="meditate" class="meditate">
@@ -26,7 +27,14 @@ meditate.addEventListener("click", () => {
   setTimeout(() => flame.classList.remove("show"), 600);
 });
 
-setInterval(() => {
-  counter++;
-  counterDiv.textContent = `${counter} ${UNIT}`;
-}, 1000);
+let last = performance.now();
+function loop(now: number) {
+  const dt = (now - last) / 1000;
+  last = now;
+
+  counter += dt * rps;
+  counterDiv.textContent = `${counter.toFixed(2)} ${UNIT}`;
+
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
