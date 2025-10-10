@@ -25,3 +25,8 @@ meditate.addEventListener("click", () => {
   flame.classList.add("show");
   setTimeout(() => flame.classList.remove("show"), 600);
 });
+
+setInterval(() => {
+  counter++;
+  counterDiv.textContent = `${counter} ${UNIT}`;
+}, 1000);
