@@ -1,5 +1,6 @@
 .icon {
-  width: 64px;
-  vertical-align: top;
-  border: 1px solid salmon;
+  display: block;
+  margin: 0 auto; 
+  width: 200px;     
+  height: auto; 
 }
