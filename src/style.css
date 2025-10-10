@@ -41,3 +41,30 @@
   display: inline-block;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
+
+#buy-upgrade {
+  display: inline-block;
+  position: absolute;
+  top: 20px;
+  right: -220px;
+
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background: #6ec1e4;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#buy-upgrade:hover:not(:disabled) {
+  background: #4aa3c0;
+}
+
+#buy-upgrade:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
