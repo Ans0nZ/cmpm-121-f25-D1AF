@@ -11,6 +11,10 @@ document.body.innerHTML = `
     <img src="${exampleIconUrl}" class="icon" alt="meditator" />
     <img src="${flameIconUrl}" id="flame" class="flame" alt="flame" />
     <div id="counter" class="counter">0 ${UNIT}</div>
+
+    <button id="buy-upgrade" disabled>
+      Buy upgrade (+1/sec) — Cost: 10 ${UNIT}
+    </button>
   </div>
   
   
