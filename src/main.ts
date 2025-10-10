@@ -1,11 +1,11 @@
-import exampleIconUrl from "./noun-paperclip-7598668-00449F.png";
+import exampleIconUrl from "./dazuo.png";
 import "./style.css";
 
 let counter = 0;
 let costcounter = 0;
 
 document.body.innerHTML = `
-  <p>Example image asset: <img src="${exampleIconUrl}" class="icon" /></p>
+  <p>Buttom: <img src="${exampleIconUrl}" class="icon" /></p>
   
 `;
 
