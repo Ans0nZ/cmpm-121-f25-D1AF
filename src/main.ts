@@ -1,30 +1,19 @@
 import exampleIconUrl from "./dazuo.png";
+import flameIconUrl from "./lingqi.png";
 import "./style.css";
 
 let counter: number = 0;
 const UNIT = "qi";
 
 document.body.innerHTML = `
-  <p>
-    <button id="increment">
-     <img src="${exampleIconUrl}" class="icon" />
-    </button>
-  </p>
-    <div id="counter">0 ${UNIT}</div>
-    <div id="message"></div>
+  <div id="meditate" class="meditate">
+    <img src="${exampleIconUrl}" class="icon" alt="meditator" />
+    <img src="${flameIconUrl}" id="flame" class="flame" alt="flame" />
+  </div>
   
 `;
 
-const button = document.getElementById("increment")!;
-const counterDiv = document.getElementById("counter")!;
-const messageDiv = document.getElementById("message")!;
-
-button.addEventListener("click", () => {
+for (let i = 0; i < 4; i++) {
   counter++;
-  counterDiv.textContent = `${counter} ${UNIT}`;
-  messageDiv.textContent = "灵气 +1";
-
-  setTimeout(() => {
-    messageDiv.textContent = "";
-  }, 800);
-});
+  costcounter++;
+}
