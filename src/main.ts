@@ -8,6 +8,27 @@ const UNIT = "qi";
 let growthRate = 0;
 const UPGRADE_COST = 10;
 
+// --- Step 6: upgrades config & counts ---
+type Upgrade = {
+  id: string;        // 用作按钮 id
+  label: string;     // 按钮上的文字（不含价格）
+  cost: number;      // 花费
+  bonus: number;     // 每秒增加量
+};
+
+const _upgrades: Upgrade[] = [
+  { id: "upgradeA", label: "Upgrade A (+0.1/sec)", cost: 10, bonus: 0.1 },
+  { id: "upgradeB", label: "Upgrade B (+2/sec)",   cost: 100, bonus: 2.0 },
+  { id: "upgradeC", label: "Upgrade C (+50/sec)",  cost: 1000, bonus: 50.0 },
+];
+
+// 每种升级已购买次数
+const _purchased: Record<string, number> = {
+  upgradeA: 0,
+  upgradeB: 0,
+  upgradeC: 0,
+};
+
 document.body.innerHTML = `
   <div id="meditate" class="meditate">
     <img src="${exampleIconUrl}" class="icon" alt="meditator" />
