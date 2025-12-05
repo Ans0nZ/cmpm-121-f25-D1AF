@@ -1,29 +1,29 @@
+// src/main.ts
 import exampleIconUrl from "./dazuo.png";
-import flameIconUrl from "./lingqi.png";
 import "./style.css";
 
-let counter: number = 0;
-const UNIT = "qi";
-//const rps = 1;
-let growthRate = 0;
-const UPGRADE_COST = 10;
+let counter = 0; // 当前 qi 总量
+let growthRate = 0; // 每秒自动增长速率，初始为 0
 
-// --- Step 6: upgrades config & counts ---
+const UNIT = "qi";
+const CLICK_GAIN = 1;
+
+// Step 6：升级配置 + 已购买次数
 type Upgrade = {
-  id: string;        // 用作按钮 id
-  label: string;     // 按钮上的文字（不含价格）
-  cost: number;      // 花费
-  bonus: number;     // 每秒增加量
+  id: string;
+  label: string;
+  cost: number;
+  bonus: number;
 };
 
-const _upgrades: Upgrade[] = [
+const upgrades: Upgrade[] = [
   { id: "upgradeA", label: "Upgrade A (+0.1/sec)", cost: 10, bonus: 0.1 },
-  { id: "upgradeB", label: "Upgrade B (+2/sec)",   cost: 100, bonus: 2.0 },
-  { id: "upgradeC", label: "Upgrade C (+50/sec)",  cost: 1000, bonus: 50.0 },
+  { id: "upgradeB", label: "Upgrade B (+2/sec)", cost: 100, bonus: 2.0 },
+  { id: "upgradeC", label: "Upgrade C (+50/sec)", cost: 1000, bonus: 50.0 },
 ];
 
-// 每种升级已购买次数
-const _purchased: Record<string, number> = {
+// 已购买次数
+const purchased: Record<string, number> = {
   upgradeA: 0,
   upgradeB: 0,
   upgradeC: 0,
@@ -32,53 +32,81 @@ const _purchased: Record<string, number> = {
 document.body.innerHTML = `
   <div id="meditate" class="meditate">
     <img src="${exampleIconUrl}" class="icon" alt="meditator" />
-    <img src="${flameIconUrl}" id="flame" class="flame" alt="flame" />
-    <div id="counter" class="counter">0 ${UNIT}</div>
-
-    <button id="buy-upgrade" disabled>
-      Upgrade — Cost: 10 ${UNIT}
-    </button>
+    <div id="counter">0 ${UNIT}</div>
+    <div id="rate" class="rate">0.00 ${UNIT}/sec</div>
   </div>
-  
-  
+
+  <div id="shop">
+    ${
+  upgrades
+    .map(
+      (u) => `
+      <div class="shop-row">
+        <button id="${u.id}" disabled>
+          ${u.label} — Cost: ${u.cost} ${UNIT}
+        </button>
+        <span id="${u.id}-count" class="count-badge">x0</span>
+      </div>
+    `,
+    )
+    .join("")
+}
+  </div>
 `;
-const meditate = document.getElementById("meditate")!;
-const flame = document.getElementById("flame") as HTMLImageElement;
-const counterDiv = document.getElementById("counter") as HTMLDivElement; //counter div
 
-// Upgrade button(step 5)
-const buyButton = document.getElementById("buy-upgrade") as HTMLButtonElement;
+// DOM 引用
+const meditate = document.getElementById("meditate") as HTMLDivElement;
+const counterDiv = document.getElementById("counter") as HTMLDivElement;
+const rateDiv = document.getElementById("rate") as HTMLDivElement;
 
+// 点击小人：立刻 +1 qi
 meditate.addEventListener("click", () => {
-  counter++;
-  counterDiv.textContent = `${counter} ${UNIT}`;
-
-  flame.classList.add("show");
-  setTimeout(() => flame.classList.remove("show"), 600);
+  counter += CLICK_GAIN;
+  refreshUI();
 });
 
-function refreshUI() {
+// 绑定三个升级按钮
+upgrades.forEach((u) => {
+  const btn = document.getElementById(u.id) as HTMLButtonElement;
+  btn.addEventListener("click", () => {
+    if (counter >= u.cost) {
+      counter -= u.cost;
+      growthRate += u.bonus;
+      purchased[u.id] += 1;
+      refreshUI();
+    }
+  });
+});
+
+// 刷新界面：总量 / 速率 / 每种已购次数 / 按钮是否可用
+function refreshUI(): void {
   counterDiv.textContent = `${counter.toFixed(2)} ${UNIT}`;
-  buyButton.disabled = counter < UPGRADE_COST;
+  rateDiv.textContent = `${growthRate.toFixed(2)} ${UNIT}/sec`;
+
+  upgrades.forEach((u) => {
+    const btn = document.getElementById(u.id) as HTMLButtonElement;
+    const badge = document.getElementById(
+      `${u.id}-count`,
+    ) as HTMLSpanElement;
+
+    btn.disabled = counter < u.cost;
+    badge.textContent = `x${purchased[u.id]}`;
+  });
 }
 
-buyButton.addEventListener("click", () => {
-  if (counter >= UPGRADE_COST) {
-    counter -= UPGRADE_COST;
-    growthRate += 1;
-    refreshUI();
-  }
-});
-
+// requestAnimationFrame 循环：按真实时间自动增长
 let last = performance.now();
-function loop(now: number) {
-  const dt = (now - last) / 1000;
+
+function loop(now: number): void {
+  const dt = (now - last) / 1000; // 秒
   last = now;
 
   counter += dt * growthRate;
   refreshUI();
-  counterDiv.textContent = `${counter.toFixed(2)} ${UNIT}`;
 
   requestAnimationFrame(loop);
 }
+
+// 初始化一次 UI，然后启动循环
+refreshUI();
 requestAnimationFrame(loop);
