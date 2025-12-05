@@ -10,18 +10,46 @@ let growthRate = 0;
 const UNIT = "qi";
 const CLICK_GAIN = 1;
 
-// Step 9: 数据驱动设计 —— 用一个数组描述所有物品
+// Step 10: 数据驱动 + 描述字段
 interface Item {
-  name: string; // 名字（也会出现在按钮上）
+  name: string; // 名字（按钮标题）
+  description: string; // 描述（小字说明）
   cost: number; // 初始价格
-  rate: number; // 每秒增加量 (qi/sec)
+  rate: number; // 每秒 qi 增长量
 }
 
-// 用你在 Step 8 选的三个升级
+// 用修仙主题设计 5 个道具，前 3 个还是你之前的数值
 const availableItems: Item[] = [
-  { name: "Incense Burner",       cost: 10,   rate: 0.1 },
-  { name: "Meditation Mat",       cost: 100,  rate: 2.0 },
-  { name: "Ancient Spirit Statue", cost: 1000, rate: 50.0 },
+  {
+    name: "Incense Burner",
+    description: "A simple burner that gently gathers qi around you.",
+    cost: 10,
+    rate: 0.1,
+  },
+  {
+    name: "Meditation Mat",
+    description: "A comfy mat that lets you meditate longer without numb legs.",
+    cost: 100,
+    rate: 2.0,
+  },
+  {
+    name: "Ancient Spirit Statue",
+    description: "An ancient statue that radiates dense spiritual energy.",
+    cost: 1000,
+    rate: 50.0,
+  },
+  {
+    name: "Spirit Tea House",
+    description: "Brews spirit tea that keeps your focus sharp and qi flowing.",
+    cost: 5000,
+    rate: 150.0,
+  },
+  {
+    name: "Floating Cloud Pavilion",
+    description: "A sanctuary above the clouds where qi condenses rapidly.",
+    cost: 20000,
+    rate: 600.0,
+  },
 ];
 
 // 每种物品已购买次数（与 availableItems 一一对应）
@@ -43,21 +71,32 @@ document.body.innerHTML = `
   </div>
 
   <div id="shop">
-    ${availableItems
-      .map(
-        (item, index) => `
+    ${
+  availableItems
+    .map(
+      (item, index) => `
       <div class="shop-row">
         <button id="buy-${index}" disabled>
-          ${item.name} (+${item.rate} ${UNIT}/sec)
-          — Cost: <span id="price-${index}">${getCurrentCost(index).toFixed(
+          <div class="item-title">
+            ${item.name} (+${item.rate} ${UNIT}/sec)
+          </div>
+          <div class="item-desc">
+            ${item.description}
+          </div>
+          <div class="item-cost">
+            Cost: <span id="price-${index}">${
+        getCurrentCost(index).toFixed(
           2,
-        )}</span> ${UNIT}
+        )
+      }</span> ${UNIT}
+          </div>
         </button>
         <span id="count-${index}" class="count-badge">x0</span>
       </div>
     `,
-      )
-      .join("")}
+    )
+    .join("")
+}
   </div>
 `;
 
@@ -75,6 +114,9 @@ meditate.addEventListener("click", () => {
 // 循环绑定每个物品对应的购买按钮
 availableItems.forEach((item, index) => {
   const btn = document.getElementById(`buy-${index}`) as HTMLButtonElement;
+
+  // 鼠标停在按钮上时显示描述（tooltip），顺便让 description 一定被用到
+  btn.title = item.description;
 
   btn.addEventListener("click", () => {
     const currentCost = getCurrentCost(index);
@@ -115,6 +157,9 @@ function refreshUI(): void {
 
     // 是否够买？
     btn.disabled = counter < currentCost;
+
+    // 保证 tooltip 也更新（虽然描述没变，这里只是示范 item 的使用）
+    btn.title = item.description;
   });
 }
 
