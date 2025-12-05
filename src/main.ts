@@ -2,23 +2,24 @@
 import exampleIconUrl from "./dazuo.png";
 import "./style.css";
 
-// 当前灵气总量
+// Current total qi
 let counter = 0;
-// 每秒自动增长速率
+
+// Passive growth rate (qi per second)
 let growthRate = 0;
 
 const UNIT = "qi";
 const CLICK_GAIN = 1;
 
-// Step 10: 数据驱动 + 描述字段
+// Step 10: Data-driven design + description field
 interface Item {
-  name: string; // 名字（按钮标题）
-  description: string; // 描述（小字说明）
-  cost: number; // 初始价格
-  rate: number; // 每秒 qi 增长量
+  name: string; // Display name (button title)
+  description: string; // Short description (tooltip / subtitle)
+  cost: number; // Base price
+  rate: number; // Qi gained per second
 }
 
-// 用修仙主题设计 5 个道具，前 3 个还是你之前的数值
+// Five cultivation-themed items (first three keep original assignment values)
 const availableItems: Item[] = [
   {
     name: "Incense Burner",
@@ -52,17 +53,17 @@ const availableItems: Item[] = [
   },
 ];
 
-// 每种物品已购买次数（与 availableItems 一一对应）
+// Number of items purchased (one-to-one with availableItems)
 const purchasedCounts: number[] = availableItems.map(() => 0);
 
-// 计算某个物品当前价格：基础价格 * 1.15^(购买次数)
+// Compute current price = base cost * 1.15^(purchase count)
 function getCurrentCost(index: number): number {
   const base = availableItems[index].cost;
   const count = purchasedCounts[index];
   return base * Math.pow(1.15, count);
 }
 
-// ---------- HTML ----------
+// ---------- HTML UI ----------
 document.body.innerHTML = `
   <div id="meditate" class="meditate">
     <img src="${exampleIconUrl}" class="icon" alt="cultivator in meditation" />
@@ -72,111 +73,101 @@ document.body.innerHTML = `
 
   <div id="shop">
     ${
-  availableItems
-    .map(
-      (item, index) => `
-      <div class="shop-row">
-        <button id="buy-${index}" disabled>
-          <div class="item-title">
-            ${item.name} (+${item.rate} ${UNIT}/sec)
-          </div>
-          <div class="item-desc">
-            ${item.description}
-          </div>
-          <div class="item-cost">
-            Cost: <span id="price-${index}">${
-        getCurrentCost(index).toFixed(
-          2,
+      availableItems
+        .map(
+          (item, index) => `
+        <div class="shop-row">
+          <button id="buy-${index}" disabled>
+            <div class="item-title">
+              ${item.name} (+${item.rate} ${UNIT}/sec)
+            </div>
+            <div class="item-desc">
+              ${item.description}
+            </div>
+            <div class="item-cost">
+              Cost: <span id="price-${index}">${getCurrentCost(index).toFixed(2)}</span> ${UNIT}
+            </div>
+          </button>
+          <span id="count-${index}" class="count-badge">x0</span>
+        </div>
+      `
         )
-      }</span> ${UNIT}
-          </div>
-        </button>
-        <span id="count-${index}" class="count-badge">x0</span>
-      </div>
-    `,
-    )
-    .join("")
-}
+        .join("")
+    }
   </div>
 `;
 
-// ---------- DOM 引用 ----------
+// ---------- DOM References ----------
 const meditate = document.getElementById("meditate") as HTMLDivElement;
 const counterDiv = document.getElementById("counter") as HTMLDivElement;
 const rateDiv = document.getElementById("rate") as HTMLDivElement;
 
-// 点击打坐：立刻 +1 qi
+// Manual click: +1 qi per click
 meditate.addEventListener("click", () => {
   counter += CLICK_GAIN;
   refreshUI();
 });
 
-// 循环绑定每个物品对应的购买按钮
+// Bind each upgrade button
 availableItems.forEach((item, index) => {
   const btn = document.getElementById(`buy-${index}`) as HTMLButtonElement;
 
-  // 鼠标停在按钮上时显示描述（tooltip），顺便让 description 一定被用到
+  // Use description as tooltip text
   btn.title = item.description;
 
   btn.addEventListener("click", () => {
     const currentCost = getCurrentCost(index);
     if (counter >= currentCost) {
-      // 扣钱
+      // Deduct cost
       counter -= currentCost;
-      // 增加被动增长速率
+      // Increase growth rate
       growthRate += item.rate;
-      // 记录购买次数
+      // Track purchases
       purchasedCounts[index] += 1;
-      // 刷新 UI（价格、次数、按钮状态）
+      // Refresh UI (price, counts, button states)
       refreshUI();
     }
   });
 });
 
-// ---------- UI 更新 ----------
+// ---------- UI Refresh ----------
 function refreshUI(): void {
   counterDiv.textContent = `${counter.toFixed(2)} ${UNIT}`;
   rateDiv.textContent = `${growthRate.toFixed(2)} ${UNIT}/sec`;
 
   availableItems.forEach((item, index) => {
-    const btn = document.getElementById(
-      `buy-${index}`,
-    ) as HTMLButtonElement;
-    const priceSpan = document.getElementById(
-      `price-${index}`,
-    ) as HTMLSpanElement;
-    const countSpan = document.getElementById(
-      `count-${index}`,
-    ) as HTMLSpanElement;
+    const btn = document.getElementById(`buy-${index}`) as HTMLButtonElement;
+    const priceSpan = document.getElementById(`price-${index}`) as HTMLSpanElement;
+    const countSpan = document.getElementById(`count-${index}`) as HTMLSpanElement;
 
     const currentCost = getCurrentCost(index);
 
-    // 更新价格显示和购买次数
+    // Update price and owned count
     priceSpan.textContent = currentCost.toFixed(2);
     countSpan.textContent = `x${purchasedCounts[index]}`;
 
-    // 是否够买？
+    // Enable / disable button based on affordability
     btn.disabled = counter < currentCost;
 
-    // 保证 tooltip 也更新（虽然描述没变，这里只是示范 item 的使用）
+    // Refresh tooltip text (not strictly needed, but keeps description in sync)
     btn.title = item.description;
   });
 }
 
-// ---------- 自动增长：requestAnimationFrame ----------
+// ---------- Passive Growth Loop (requestAnimationFrame) ----------
 let last = performance.now();
 
 function loop(now: number): void {
-  const dt = (now - last) / 1000; // 秒
+  const dt = (now - last) / 1000; // seconds elapsed
   last = now;
 
-  // 根据当前 growthRate 增长 qi
+  // Apply automated growth
   counter += dt * growthRate;
   refreshUI();
 
   requestAnimationFrame(loop);
 }
 
-// 启动
+// Start game loop
 refreshUI();
 requestAnimationFrame(loop);
