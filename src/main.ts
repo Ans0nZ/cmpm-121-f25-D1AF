@@ -13,13 +13,14 @@ type Upgrade = {
   id: string;
   label: string;
   cost: number;
+  currentCost: number;
   bonus: number;
 };
 
 const upgrades: Upgrade[] = [
-  { id: "upgradeA", label: "Upgrade A (+0.1/sec)", cost: 10, bonus: 0.1 },
-  { id: "upgradeB", label: "Upgrade B (+2/sec)", cost: 100, bonus: 2.0 },
-  { id: "upgradeC", label: "Upgrade C (+50/sec)", cost: 1000, bonus: 50.0 },
+  { id: "upgradeA", label: "Upgrade A (+0.1/sec)", cost: 10, currentCost: 10, bonus: 0.1 },
+  { id: "upgradeB", label: "Upgrade B (+2/sec)", cost: 100, currentCost: 100, bonus: 2.0 },
+  { id: "upgradeC", label: "Upgrade C (+50/sec)", cost: 1000, currentCost: 1000, bonus: 50.0 },
 ];
 
 // 已购买次数
