@@ -2,52 +2,37 @@
 import exampleIconUrl from "./dazuo.png";
 import "./style.css";
 
-let counter = 0; // 当前灵气总量
-let growthRate = 0; // 每秒自动增长速率
+// 当前灵气总量
+let counter = 0;
+// 每秒自动增长速率
+let growthRate = 0;
 
-// Step 8: 统一叙事 —— 修仙 / 灵气主题
-const UNIT = "qi"; // 显示为 “x.xx qi”
+const UNIT = "qi";
 const CLICK_GAIN = 1;
 
-// 升级配置：香炉 / 打坐蒲团 / 上古灵像
-type Upgrade = {
-  id: string; // 按钮 id
-  label: string; // 显示文字（不含价格）
-  cost: number; // 初始价格（保留）
-  currentCost: number; // 当前价格（会增长）
-  bonus: number; // 增长速率加成 (UNIT/sec)
-};
+// Step 9: 数据驱动设计 —— 用一个数组描述所有物品
+interface Item {
+  name: string; // 名字（也会出现在按钮上）
+  cost: number; // 初始价格
+  rate: number; // 每秒增加量 (qi/sec)
+}
 
-const upgrades: Upgrade[] = [
-  {
-    id: "upgradeA",
-    label: "Incense Burner (+0.1 qi/sec)",
-    cost: 10,
-    currentCost: 10,
-    bonus: 0.1,
-  },
-  {
-    id: "upgradeB",
-    label: "Meditation Mat (+2 qi/sec)",
-    cost: 100,
-    currentCost: 100,
-    bonus: 2.0,
-  },
-  {
-    id: "upgradeC",
-    label: "Ancient Spirit Statue (+50 qi/sec)",
-    cost: 1000,
-    currentCost: 1000,
-    bonus: 50.0,
-  },
+// 用你在 Step 8 选的三个升级
+const availableItems: Item[] = [
+  { name: "Incense Burner",       cost: 10,   rate: 0.1 },
+  { name: "Meditation Mat",       cost: 100,  rate: 2.0 },
+  { name: "Ancient Spirit Statue", cost: 1000, rate: 50.0 },
 ];
 
-// 已购次数
-const purchased: Record<string, number> = {
-  upgradeA: 0,
-  upgradeB: 0,
-  upgradeC: 0,
-};
+// 每种物品已购买次数（与 availableItems 一一对应）
+const purchasedCounts: number[] = availableItems.map(() => 0);
+
+// 计算某个物品当前价格：基础价格 * 1.15^(购买次数)
+function getCurrentCost(index: number): number {
+  const base = availableItems[index].cost;
+  const count = purchasedCounts[index];
+  return base * Math.pow(1.15, count);
+}
 
 // ---------- HTML ----------
 document.body.innerHTML = `
@@ -58,28 +43,25 @@ document.body.innerHTML = `
   </div>
 
   <div id="shop">
-    ${
-  upgrades
-    .map(
-      (u) => `
+    ${availableItems
+      .map(
+        (item, index) => `
       <div class="shop-row">
-        <button id="${u.id}" disabled>
-          ${u.label} — Cost: <span id="${u.id}-price">${
-        u.currentCost.toFixed(
+        <button id="buy-${index}" disabled>
+          ${item.name} (+${item.rate} ${UNIT}/sec)
+          — Cost: <span id="price-${index}">${getCurrentCost(index).toFixed(
           2,
-        )
-      }</span> ${UNIT}
+        )}</span> ${UNIT}
         </button>
-        <span id="${u.id}-count" class="count-badge">x0</span>
+        <span id="count-${index}" class="count-badge">x0</span>
       </div>
     `,
-    )
-    .join("")
-}
+      )
+      .join("")}
   </div>
 `;
 
-// ---------- DOM ----------
+// ---------- DOM 引用 ----------
 const meditate = document.getElementById("meditate") as HTMLDivElement;
 const counterDiv = document.getElementById("counter") as HTMLDivElement;
 const rateDiv = document.getElementById("rate") as HTMLDivElement;
@@ -90,51 +72,60 @@ meditate.addEventListener("click", () => {
   refreshUI();
 });
 
-// 升级按钮逻辑（香炉 / 蒲团 / 灵像）
-upgrades.forEach((u) => {
-  const btn = document.getElementById(u.id) as HTMLButtonElement;
+// 循环绑定每个物品对应的购买按钮
+availableItems.forEach((item, index) => {
+  const btn = document.getElementById(`buy-${index}`) as HTMLButtonElement;
 
   btn.addEventListener("click", () => {
-    if (counter >= u.currentCost) {
-      counter -= u.currentCost;
-      growthRate += u.bonus;
-      purchased[u.id] += 1;
-
-      // Step 7：价格上涨 15%
-      u.currentCost *= 1.15;
-
+    const currentCost = getCurrentCost(index);
+    if (counter >= currentCost) {
+      // 扣钱
+      counter -= currentCost;
+      // 增加被动增长速率
+      growthRate += item.rate;
+      // 记录购买次数
+      purchasedCounts[index] += 1;
+      // 刷新 UI（价格、次数、按钮状态）
       refreshUI();
     }
   });
 });
 
-// ---------- UI ----------
+// ---------- UI 更新 ----------
 function refreshUI(): void {
   counterDiv.textContent = `${counter.toFixed(2)} ${UNIT}`;
   rateDiv.textContent = `${growthRate.toFixed(2)} ${UNIT}/sec`;
 
-  upgrades.forEach((u) => {
-    const btn = document.getElementById(u.id) as HTMLButtonElement;
-    const badge = document.getElementById(
-      `${u.id}-count`,
+  availableItems.forEach((item, index) => {
+    const btn = document.getElementById(
+      `buy-${index}`,
+    ) as HTMLButtonElement;
+    const priceSpan = document.getElementById(
+      `price-${index}`,
     ) as HTMLSpanElement;
-    const price = document.getElementById(
-      `${u.id}-price`,
+    const countSpan = document.getElementById(
+      `count-${index}`,
     ) as HTMLSpanElement;
 
-    btn.disabled = counter < u.currentCost;
-    badge.textContent = `x${purchased[u.id]}`;
-    price.textContent = u.currentCost.toFixed(2);
+    const currentCost = getCurrentCost(index);
+
+    // 更新价格显示和购买次数
+    priceSpan.textContent = currentCost.toFixed(2);
+    countSpan.textContent = `x${purchasedCounts[index]}`;
+
+    // 是否够买？
+    btn.disabled = counter < currentCost;
   });
 }
 
-// ---------- requestAnimationFrame ----------
+// ---------- 自动增长：requestAnimationFrame ----------
 let last = performance.now();
 
 function loop(now: number): void {
   const dt = (now - last) / 1000; // 秒
   last = now;
 
+  // 根据当前 growthRate 增长 qi
   counter += dt * growthRate;
   refreshUI();
 
